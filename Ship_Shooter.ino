@@ -15,14 +15,18 @@ int ship_y = 21;
 
 int ship_v = 1;
 
-//bullets
+//player bullets
 const int PLAYER_BULLETS_COUNT = 10;
 bullet *player_bullets[PLAYER_BULLETS_COUNT];
+const int BULLET_DELAY_DURATION = (1 * 20) / 4; //ship will be able to shot every x seconds; seconds * 20; seconds * (1000ms / 50ms); 50 because main loop works every 50ms
+int bullet_delay_count = BULLET_DELAY_DURATION; //it will be better if player will be able to shoot right after the game starts; later in the code game checks if bulet_dellay_count is equals to BULLET_DELAY_DURATION and allows player to fire
 
 
-// clouds cloud_1;
-// clouds cloud_2;
-// clouds cloud_3;
+//clouds
+const int CLOUDS_COUNT = 6;
+clouds *clouds_tab[CLOUDS_COUNT];
+
+//######_main_######
 
 void setup(){
 	gb.begin();
@@ -33,10 +37,9 @@ void setup(){
 		player_bullets[i] = nullptr;
 	}
 
-	// cloud_1.create_cloud(1);
-	// cloud_2.create_cloud(2);
-	// cloud_2.create_cloud(3);
-
+	for (int i = 0; i < CLOUDS_COUNT; i++){
+		clouds_tab[i] = nullptr;
+	}
 }
 
 void loop(){
@@ -52,37 +55,62 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		ship_x += ship_v;
 	}
 
-	if (gb.buttons.repeat(BTN_A, 0)){
+	//create player bullets
+
+	if(bullet_delay_count < BULLET_DELAY_DURATION) bullet_delay_count++;
+	if (gb.buttons.repeat(BTN_A, 0) && bullet_delay_count == BULLET_DELAY_DURATION){
 		for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
 			if (player_bullets[i] == nullptr){
 				player_bullets[i] = new bullet(ship_x + 2, ship_y + 3, PLAYER);
+				bullet_delay_count = 0;
 				break;
 			}
 		}	
 	}
 
 	//LOGIC
+	//move bullets and/or delete bullets
+	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
+		if (player_bullets[i] != nullptr)
+			player_bullets[i] -> move_bullet();
+		if (player_bullets[i] -> bullet_out()){
+			delete player_bullets[i];
+			player_bullets[i] = nullptr;
+		}
+	}
+
+	//create, move and delete clouds
+	for (int i = 0; i < CLOUDS_COUNT; i++){
+		if (clouds_tab[i] == nullptr){
+			clouds_tab[i] = new clouds(random(1,4));
+		}
+	}
+	for (int i = 0; i < CLOUDS_COUNT; i++){
+		if (clouds_tab[i] != nullptr)
+			clouds_tab[i] -> move_cloud();
+		if (clouds_tab[i] -> cloud_out()){
+			delete clouds_tab[i];
+			clouds_tab[i] = nullptr;
+		}
+	}
 
 	//DRAW
 	gb.display.clear();
 
 	gb.display.drawBitmap(ship_x, ship_y, SHIP);
 
+	//draw bullets
 	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
 		if (player_bullets[i] != nullptr)
 			player_bullets[i] -> draw_bullet();
 	}
 
+	//draw clouds
+	for (int i = 0; i < CLOUDS_COUNT; i++){
+		if (clouds_tab[i] != nullptr)
+			clouds_tab[i] -> draw_cloud();
+	}
 
 
-
-
-	// cloud_1.move_cloud();
-	// cloud_1.display_cloud();
-	// cloud_2.move_cloud();
-	// cloud_2.display_cloud();
-	// cloud_3.move_cloud();
-	// cloud_3.display_cloud();
-	
 }//gb.update END
 }//loop() END

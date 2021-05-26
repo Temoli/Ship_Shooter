@@ -1,5 +1,7 @@
 extern Gamebuino gb;
 
+extern const int PLAYER;
+extern const int ALIEN;
 extern const byte SHIP[];
 extern const byte CLOUD_BIG[];
 extern const byte CLOUD_MEDIUM[];
@@ -48,7 +50,7 @@ private:
 	int speed = 2;
 
 public: 
-	void create_cloud(int type){
+	clouds(int type){
 		switch (type){
 		case 1:
 			cloud = CLOUD_BIG;
@@ -58,9 +60,10 @@ public:
 			break;
 		case 3:
 			cloud = CLOUD_SMALL;
+			speed = 3;
 			break;
 		}
-		pos_x = random(LCDWIDTH, LCDWIDTH + 21);
+		pos_x = random(LCDWIDTH, LCDWIDTH * 2);
 		pos_y = random(-5, LCDHEIGHT + 10);
 	}
 
@@ -70,11 +73,12 @@ public:
 	}
 
 	bool cloud_out(){
-		if(pos_x < -50)
+		if(pos_x < -40)
 			return true;
+		else return false;
 	}
 
-	void display_cloud(){
+	void draw_cloud(){
 		if(!(gb.frameCount % 3))
 			gb.display.drawBitmap(pos_x, pos_y, cloud);
 	}
@@ -87,7 +91,7 @@ private:
 
 	int whose_bullet;
 	
-	int speed = 2;
+	int bullet_speed = 2;
 
 public:
 	bullet(int x, int y, int who_fires){
@@ -98,7 +102,7 @@ public:
 	}
 
 	void move_bullet(){
-		pos_x;
+		pos_x += bullet_speed;
 	}
 
 	void draw_bullet(){
@@ -106,8 +110,9 @@ public:
 	}
 
 	bool bullet_out(){
-		if ((pos_x > LCDWIDTH + 2) || (pos_x < -2))
+		if ((pos_x > LCDWIDTH + 2 && whose_bullet == PLAYER) || (pos_x < -2 && whose_bullet == ALIEN))
 			return true;
+		else return false;
 	}
 
 	bool collision(int x, int y, const byte BITMAP[]){
