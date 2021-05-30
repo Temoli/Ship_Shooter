@@ -42,14 +42,17 @@ class alien{
 
 class clouds{
 private:
-	int pos_x;
-	int pos_y;
+	int pos_x = random(LCDWIDTH, LCDWIDTH * 2);
+	int pos_y = random(-5, LCDHEIGHT + 10);
+
+	int rotation = random(0, 4);
+	int flip = random(0, 4);
 
 	byte * cloud;
 
 	int speed = 2;
 
-public: 
+public:
 	clouds(int type){
 		switch (type){
 		case 1:
@@ -63,8 +66,6 @@ public:
 			speed = 3;
 			break;
 		}
-		pos_x = random(LCDWIDTH, LCDWIDTH * 2);
-		pos_y = random(-5, LCDHEIGHT + 10);
 	}
 
 	void move_cloud(){
@@ -80,7 +81,7 @@ public:
 
 	void draw_cloud(){
 		if(!(gb.frameCount % 3))
-			gb.display.drawBitmap(pos_x, pos_y, cloud);
+			gb.display.drawBitmap(pos_x, pos_y, cloud, rotation, flip);
 	}
 };
 
@@ -89,7 +90,7 @@ private:
 	int pos_x;
 	int pos_y;
 
-	int whose_bullet;
+	// int whose_bullet;
 	
 	int bullet_speed = 2;
 
@@ -99,6 +100,13 @@ public:
 		pos_y = y;
 
 		whose_bullet = who_fires;
+	}
+
+	int get_x(){
+		return pos_x;
+	}
+	int get_y(){
+		return pos_y;
 	}
 
 	void move_bullet(){
@@ -115,7 +123,7 @@ public:
 		else return false;
 	}
 
-	bool collision(int x, int y, const byte BITMAP[]){
-		return gb.collideBitmapBitmap(x, y, BITMAP, pos_x, pos_y, BULLET);
-	}
+	// bool collision(int x, int y, const byte BITMAP[]){
+	// 	return gb.collideBitmapBitmap(x, y, BITMAP, pos_x, pos_y, BULLET);
+	// }
 };
