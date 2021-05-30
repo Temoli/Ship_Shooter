@@ -68,6 +68,8 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		}	
 	}
 
+	if(gb.buttons.repeat(BTN_C, 0))
+		gb.titleScreen(F("Space shooter"));
 	//LOGIC
 	//move bullets and/or delete bullets
 	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
