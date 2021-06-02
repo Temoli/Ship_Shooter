@@ -21,6 +21,9 @@ bullet *player_bullets[PLAYER_BULLETS_COUNT];
 const int BULLET_DELAY_DURATION = (1 * 20) / 4; //ship will be able to shot every x seconds; seconds * 20; seconds * (1000ms / 50ms); 50 because main loop works every 50ms
 int bullet_delay_count = BULLET_DELAY_DURATION; //it will be better if player will be able to shoot right after the game starts; later in the code game checks if bulet_dellay_count is equals to BULLET_DELAY_DURATION and allows player to fire
 
+//aliens
+const int ALIENS_COUNT = 3;
+aliens *aliens_tab[ALIENS_COUNT];
 
 //clouds
 const int CLOUDS_COUNT = 6;
@@ -39,6 +42,10 @@ void setup(){
 
 	for (int i = 0; i < CLOUDS_COUNT; i++){
 		clouds_tab[i] = nullptr;
+	}
+
+	for (int i = 0; i < ALIENS_COUNT; i++){
+		aliens_tab[i] == nullptr;
 	}
 }
 
@@ -70,6 +77,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 	if(gb.buttons.repeat(BTN_C, 0))
 		gb.titleScreen(F("Space shooter"));
+
 	//LOGIC
 	//move bullets and/or delete bullets
 	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
@@ -78,6 +86,21 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		if (player_bullets[i] -> bullet_out()){
 			delete player_bullets[i];
 			player_bullets[i] = nullptr;
+		}
+	}
+
+	//create, move and delete aliens
+	for (int i = 0; i < ALIENS_COUNT; i++){
+		if (aliens_tab[i] == nullptr){
+			aliens_tab[i] = new aliens(1);
+		}
+	}
+	for (int i = 0; i < ALIENS_COUNT; i++){
+		if (aliens_tab[i] != nullptr)
+			aliens_tab[i] -> move_alien();
+		if (aliens_tab[i] -> alien_out()){
+			delete aliens_tab[i];
+			aliens_tab[i] = nullptr;
 		}
 	}
 
@@ -101,7 +124,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 	gb.display.drawBitmap(ship_x, ship_y, SHIP);
 
-	//draw bullets
+	//draw player bullets
 	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
 		if (player_bullets[i] != nullptr)
 			player_bullets[i] -> draw_bullet();
