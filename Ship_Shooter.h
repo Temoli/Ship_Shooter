@@ -7,37 +7,114 @@ extern const byte CLOUD_BIG[];
 extern const byte CLOUD_MEDIUM[];
 extern const byte CLOUD_SMALL[];
 extern const byte BULLET[];
+extern const byte ALIEN_1[];
+extern const byte ALIEN_2[];
+extern const byte ALIEN_3[];
 
-class alien{
-	private:
-		int pos_x;
-		int pos_y;
-		int speed;
+class aliens{
+private:
+	int type;
+	int pos_x;
+	int pos_y;
+	int speed;
 
-		int bullet_speed;
+	byte * alien;
 
-		int life;
+	int bullet_speed;
 
-	public:
-		void create_alien(int type){
+	int life;
+
+	//used in type 3
+	bool bounce;
+	int line;
+
+public:
+	aliens(int type){
+		switch (type){
+			case 1:
+				alien = ALIEN_1;
+				this->type = type;
+				life = 1;
+
+				speed = 2;
+
+				pos_x = LCDWIDTH + 5;
+				pos_y = random(0, LCDHEIGHT - 7);
+				break;
+			case 2:
+				alien = ALIEN_2;
+				this->type = type;
+				life = 2;
+				
+				speed = 2;
+
+				pos_x = LCDWIDTH + 5;
+				pos_y = random(0, LCDHEIGHT - 7);
+				break;
+			case 3:
+				alien = ALIEN_3;
+				this->type = type;
+				life = 3;
+				
+				speed = 2;
+
+				pos_x = LCDWIDTH + 5;
+				pos_y = random(0, LCDHEIGHT - 7);
+
+				line = random(0, LCDHEIGHT - 9);
+				bounce = false;
+				break;
+		}
+	}
+
+	void move_alien(){
+		switch (type){
+			case 1:
+				pos_x += speed;
+				break;
+			case 2:
+				pos_x += abs(speed);
+				pos_y += speed;
+				if (pos_y <= 0){
+					speed = -speed;
+				} else if (pos_y >= LCDHEIGHT){
+					speed = -speed;
+				}
+			case 3:
+				pos_x += abs(speed);
+				if (bounce)
+					line--;
+				if (line && !bounce) //fly forward if bounced from edge
+					pos_y += speed;
+				
+				if (!bounce && pos_y <= 0){ //fly forward and to edge
+					speed = -speed;
+					bounce = true;
+				} else if (!bounce && pos_y >= LCDHEIGHT){
+					speed = -speed;
+					bounce = true;
+				}
 
 		}
+	}
 
-		void move_alien(){
+	void display_alien(){
+		gb.display.drawBitmap(pos_x, pos_y, alien);
+	}
 
-		}
+	bool alien_out(){
+		if(pos_x < -20)
+			return true;
+		else return false;
+	}
 
-		void display_alien(){
+	void alien_fire(int & bullet_x, int & bullet_y){
 
-		}
+	}
 
-		void alien_fire(int & bullet_x, int & bullet_y){
+	bool alien_collision(int bullet_x, int bullet_y){
 
-		}
-
-		bool alien_dmg(int bullet_x, int bullet_y){
-
-		}
+	}
 };
 
 class clouds{
@@ -90,7 +167,7 @@ private:
 	int pos_x;
 	int pos_y;
 
-	// int whose_bullet;
+	int whose_bullet;
 	
 	int bullet_speed = 2;
 
