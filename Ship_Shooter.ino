@@ -22,13 +22,19 @@ const int BULLET_DELAY_DURATION = (1 * 20) / 4; //ship will be able to shot ever
 int bullet_delay_count = BULLET_DELAY_DURATION; //it will be better if player will be able to shoot right after the game starts; later in the code game checks if bulet_dellay_count is equals to BULLET_DELAY_DURATION and allows player to fire
 
 //aliens
-const int ALIENS_COUNT = 3;
+const int ALIENS_COUNT = 4;
 aliens *aliens_tab[ALIENS_COUNT];
 
 //clouds
 const int CLOUDS_COUNT = 6;
 clouds *clouds_tab[CLOUDS_COUNT];
 
+
+//#########################
+//#########################
+int licznik = 0;
+//#########################
+//#########################
 //######_main_######
 
 void setup(){
@@ -92,7 +98,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	//create, move and delete aliens
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		if (aliens_tab[i] == nullptr){
-			aliens_tab[i] = new aliens(1);
+			aliens_tab[i] = new aliens(random(1, 3));
 		}
 	}
 	for (int i = 0; i < ALIENS_COUNT; i++){
@@ -104,6 +110,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		}
 	}
 
+<<<<<<< Updated upstream
 	//create, move and delete clouds
 	for (int i = 0; i < CLOUDS_COUNT; i++){
 		if (clouds_tab[i] == nullptr){
@@ -116,11 +123,37 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		if (clouds_tab[i] -> cloud_out()){
 			delete clouds_tab[i];
 			clouds_tab[i] = nullptr;
+=======
+	// if(!(gb.frameCount % 5)){
+			for (int j = 0; j < ALIENS_COUNT; j++){
+		for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+				if((alien_bullets[i] == nullptr) /*&& (aliens_tab[j] != nullptr)*/){
+					if (aliens_tab[j] != nullptr && !(gb.frameCount % 20)){
+						alien_bullets[i] = aliens_tab[j] -> alien_fire();
+						licznik++;
+						break;
+						// alien_bullets[i] = new bullet(LCDWIDTH-5, random(0, LCDHEIGHT), 2);
+					}
+				}
+			}
+		}
+	// }
+	//move alien bullets and/or delete bullets 
+	for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+		if (alien_bullets[i] != nullptr)
+			alien_bullets[i] -> move_bullet();
+		if (alien_bullets[i] -> bullet_out()){
+			delete alien_bullets[i];
+			alien_bullets[i] = nullptr;
+			licznik--;
+>>>>>>> Stashed changes
 		}
 	}
 
 	//DRAW
 	gb.display.clear();
+	gb.display.println(gb.getFreeRam());
+	gb.display.println(licznik);
 
 	gb.display.drawBitmap(ship_x, ship_y, SHIP);
 
@@ -131,10 +164,10 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	}
 
 	//draw clouds
-	for (int i = 0; i < CLOUDS_COUNT; i++){
-		if (clouds_tab[i] != nullptr)
-			clouds_tab[i] -> draw_cloud();
-	}
+	// for (int i = 0; i < CLOUDS_COUNT; i++){
+	// 	if (clouds_tab[i] != nullptr)
+	// 		clouds_tab[i] -> draw_cloud();
+	// }
 
 
 }//gb.update END
