@@ -20,8 +20,6 @@ private:
 
 	byte * alien;
 
-	int bullet_speed;
-
 	int life;
 
 	//used in type 3
@@ -48,7 +46,7 @@ public:
 				
 				speed = 2;
 
-				pos_x = LCDWIDTH + 5;
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 20);
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 3:
@@ -73,13 +71,14 @@ public:
 				pos_x += speed;
 				break;
 			case 2:
-				pos_x += abs(speed);
+				pos_x -= abs(speed);
 				pos_y += speed;
 				if (pos_y <= 0){
 					speed = -speed;
-				} else if (pos_y >= LCDHEIGHT){
+				} else if (pos_y >= LCDHEIGHT - 8){
 					speed = -speed;
 				}
+				break;
 			case 3:
 				pos_x += abs(speed);
 				if (bounce)
@@ -94,6 +93,7 @@ public:
 					speed = -speed;
 					bounce = true;
 				}
+				break;
 
 		}
 	}
