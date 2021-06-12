@@ -188,7 +188,7 @@ public:
 					}
 				}
 
-				if(bounce && line > 0){ //if bounced fly up/dwn a few more line
+				if(bounce && line > 0){ //if bounced fly up/dwn a few more lines
 					pos_y += speed;
 					line--;
 				}
