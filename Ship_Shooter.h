@@ -117,7 +117,7 @@ private:
 
 	//used in type 3
 	bool bounce;
-	int line;
+	int line; //set random after creation, after alien reaches top or bottom line this will be reduced with every move. After 0 alien goes only forward
 
 public:
 	aliens(int type){
@@ -129,7 +129,7 @@ public:
 
 				speed = 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 20);
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 30);
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 2:
@@ -137,9 +137,10 @@ public:
 				this->type = type;
 				life = 2;
 				
-				speed = 1;
+				random(0,1) ? speed = 1: speed = -1;
+				// speed1= 1;
 
-				pos_x = LCDWIDTH + 5;
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 30);
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 3:
@@ -147,9 +148,10 @@ public:
 				this->type = type;
 				life = 3;
 				
+				random(0,1) ? speed = 1: speed = -1;
 				speed = 1;
 
-				pos_x = LCDWIDTH + 5;
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 30);
 				pos_y = random(0, LCDHEIGHT - 7);
 
 				line = random(0, LCDHEIGHT - 9);
@@ -173,21 +175,24 @@ public:
 				}
 				break;
 			case 3:
-				pos_x += abs(speed);
-				if (bounce)
-					line--;
-				if (line && !bounce) //fly forward if bounced from edge
+				pos_x -= abs(speed);
+
+				if(!bounce){ //if not bounced fly up/down till reached screen edge
 					pos_y += speed;
-				
-				if (!bounce && pos_y <= 0){ //fly forward and to edge
-					speed = -speed;
-					bounce = true;
-				} else if (!bounce && pos_y >= LCDHEIGHT){
-					speed = -speed;
-					bounce = true;
+					if (pos_y <= 0){
+						speed = -speed;
+						bounce = true;
+					} else if (pos_y >= LCDHEIGHT - 8){
+						speed = -speed;
+						bounce = true;
+					}
+				}
+
+				if(bounce && line > 0){ //if bounced fly up/dwn a few more line
+					pos_y += speed;
+					line--;
 				}
 				break;
-
 		}
 	}
 
