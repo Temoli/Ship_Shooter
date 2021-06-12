@@ -135,7 +135,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	//create alien
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		if (aliens_tab[i] == nullptr){
-			aliens_tab[i] = new aliens(random(1, 3));
+			aliens_tab[i] = new aliens(random(1, 4));
 		}
 	}
 	
