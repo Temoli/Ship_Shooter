@@ -117,7 +117,7 @@ private:
 
 	//used in type 3
 	bool bounce;
-	int line; //set random after creation, after alien reaches top or bottom line this will be reduced with every move. After 0 alien goes only forward
+	int line; //random; after alien reaches top or bottom line this will be reduced with every move. After 0 alien goes only forward
 
 public:
 	aliens(int type){
@@ -129,7 +129,7 @@ public:
 
 				speed = 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 30);
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 50);
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 2:
@@ -140,7 +140,7 @@ public:
 				random(0,1) ? speed = 1: speed = -1;
 				// speed1= 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 30);
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 50);
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 3:
@@ -151,7 +151,7 @@ public:
 				random(0,1) ? speed = 1: speed = -1;
 				speed = 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 30);
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 50);
 				pos_y = random(0, LCDHEIGHT - 7);
 
 				line = random(0, LCDHEIGHT - 9);
@@ -200,10 +200,6 @@ public:
 		gb.display.drawBitmap(pos_x, pos_y, alien);
 	}
 	
-	//bool alien_dead(){
-	//	return life <= 0 ? true : false;
-	//}
-
 	bool alien_out(){
 		if(pos_x < -10) //TEST_1; it was -20
 			return true;
