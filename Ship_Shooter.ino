@@ -32,6 +32,7 @@ aliens *aliens_tab[ALIENS_COUNT];
 //aliens bullets
 const int ALIEN_BULLETS_COUNT = 30;
 bullet *alien_bullets[ALIEN_BULLETS_COUNT];
+const int ALIEN_FIRE_SPEED = 20;
 
 //clouds
 const int CLOUDS_COUNT = 6;
@@ -151,7 +152,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		for (int j = 0; j < ALIEN_BULLETS_COUNT; j++){
-			if(alien_bullets[j] == nullptr && aliens_tab[i] != nullptr && !(gb.frameCount % 20)){
+			if(alien_bullets[j] == nullptr && aliens_tab[i] != nullptr && !(gb.frameCount % ALIEN_FIRE_SPEED)){
 				alien_bullets[j] = aliens_tab[i] -> alien_fire();
 				break;
 			}
@@ -169,15 +170,15 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	}
 
 																							 
-	// //alien - bullet collision
-	// for (int i = 0; i < ALIENS_COUNT; i++){
-	// 	for (int j = 0; j < PLAYER_BULLETS_COUNT; j++){
-	// 		if ((aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y()))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
-	// 			delete aliens_tab[i];
-	// 			aliens_tab[i] = nullptr;
-	// 		}
-	// 	}
-	// }
+	//alien - bullet collision
+	for (int i = 0; i < ALIENS_COUNT; i++){
+		for (int j = 0; j < PLAYER_BULLETS_COUNT; j++){
+			if ((aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y()))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
+				delete aliens_tab[i];
+				aliens_tab[i] = nullptr;
+			}
+		}
+	}
 
 	//__________CLOUDS__________
 	// //create clouds
