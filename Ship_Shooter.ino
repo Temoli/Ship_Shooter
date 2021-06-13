@@ -25,7 +25,7 @@ const int BULLET_DELAY_DURATION = (1 * 20) / 4; //ship will be able to shot ever
 int bullet_delay_count = BULLET_DELAY_DURATION; //it will be better if player will be able to shoot right after the game starts; later in the code game checks if bulet_dellay_count is equals to BULLET_DELAY_DURATION and allows player to fire
 
 //aliens
-const int ALIENS_COUNT = 4;
+const int ALIENS_COUNT = 6;
 aliens *aliens_tab[ALIENS_COUNT];
 //int aliens_alive[ALIENS_COUNT]; //if 1 alien is dead if its <=0 alien is alive at this position x; it prevents aliens from overlapping
 
