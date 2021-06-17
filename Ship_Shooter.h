@@ -125,7 +125,7 @@ public:
 			case 1:
 				alien = ALIEN_1;
 				this->type = type;
-				life = 1;
+				life = 2;
 
 				speed = 1;
 
@@ -135,7 +135,7 @@ public:
 			case 2:
 				alien = ALIEN_2;
 				this->type = type;
-				life = 2;
+				life = 3;
 				
 				random(0,1) ? speed = 1: speed = -1;
 				// speed1= 1;
@@ -146,7 +146,7 @@ public:
 			case 3:
 				alien = ALIEN_3;
 				this->type = type;
-				life = 3;
+				life = 4;
 				
 				random(0,1) ? speed = 1: speed = -1;
 				speed = 1;
@@ -210,9 +210,10 @@ public:
 		return new bullet(pos_x, pos_y, ALIEN);
 	}
 
-	bool alien_collision(int bullet_x, int bullet_y){
+	bool alien_collision(int bullet_x, int bullet_y, bullet *bul){
 		if (gb.collideBitmapBitmap(bullet_x, bullet_y, BULLET, pos_x, pos_y, alien)){
 			life--;
+			bul = nullptr;
 		}
 		return life <= 0 ? true : false;
 	}

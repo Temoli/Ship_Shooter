@@ -25,7 +25,7 @@ const int BULLET_DELAY_DURATION = (1 * 20) / 4; //ship will be able to shot ever
 int bullet_delay_count = BULLET_DELAY_DURATION; //it will be better if player will be able to shoot right after the game starts; later in the code game checks if bulet_dellay_count is equals to BULLET_DELAY_DURATION and allows player to fire
 
 //aliens
-const int ALIENS_COUNT = 6;
+const int ALIENS_COUNT = 2;
 aliens *aliens_tab[ALIENS_COUNT];
 //int aliens_alive[ALIENS_COUNT]; //if 1 alien is dead if its <=0 alien is alive at this position x; it prevents aliens from overlapping
 
@@ -120,14 +120,22 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	}
 	#endif
 	//player - alien bullet collision
-	//#TO_DO
 	#if(!TEST)
 	for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
 		if (gb.collideBitmapBitmap(ship_x, ship_y, SHIP, alien_bullets[i] -> get_x(), alien_bullets[i] -> get_y(), BULLET)){
 			lifes--;
 			ship_x = 0;
 			ship_y = 21;
+			gb.popup(F("reset"), 20);
 			//gb.popup("Lifes: " + lifes, 20 * 2);
+
+			for (int i = 0; i < ALIENS_COUNT; i++){
+				aliens_tab[i] == nullptr;
+			}
+
+			for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+				alien_bullets[i] == nullptr;
+			}
 		}
 	}
 	#endif
@@ -173,7 +181,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	//alien - bullet collision
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		for (int j = 0; j < PLAYER_BULLETS_COUNT; j++){
-			if ((aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y()))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
+			if ((aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y(), player_bullets[j]))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
 				delete aliens_tab[i];
 				aliens_tab[i] = nullptr;
 			}
