@@ -181,7 +181,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	//alien - bullet collision
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		for (int j = 0; j < PLAYER_BULLETS_COUNT; j++){
-			if ((aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y(), player_bullets[j]))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
+			if ((aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y(), &player_bullets[j]))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
 				delete aliens_tab[i];
 				aliens_tab[i] = nullptr;
 			}
