@@ -210,10 +210,10 @@ public:
 		return new bullet(pos_x, pos_y, ALIEN);
 	}
 
-	bool alien_collision(int bullet_x, int bullet_y, bullet *bul){
+	bool alien_collision(int bullet_x, int bullet_y, bullet ** bul){
 		if (gb.collideBitmapBitmap(bullet_x, bullet_y, BULLET, pos_x, pos_y, alien)){
 			life--;
-			bul = nullptr;
+			*bul = nullptr;
 		}
 		return life <= 0 ? true : false;
 	}
