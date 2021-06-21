@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <Gamebuino.h>
 Gamebuino gb;
-#define TEST 1 //1 - disable player death
+#define TEST 0 //1 - disable player death
 //84x48
 const int PLAYER = 1;
 const int ALIEN = 2;
@@ -25,14 +25,14 @@ const int BULLET_DELAY_DURATION = (1 * 20) / 4; //ship will be able to shot ever
 int bullet_delay_count = BULLET_DELAY_DURATION; //it will be better if player will be able to shoot right after the game starts; later in the code game checks if bulet_dellay_count is equals to BULLET_DELAY_DURATION and allows player to fire
 
 //aliens
-const int ALIENS_COUNT = 2;
+const int ALIENS_COUNT = 10;
 aliens *aliens_tab[ALIENS_COUNT];
 //int aliens_alive[ALIENS_COUNT]; //if 1 alien is dead if its <=0 alien is alive at this position x; it prevents aliens from overlapping
 
 //aliens bullets
 const int ALIEN_BULLETS_COUNT = 30;
 bullet *alien_bullets[ALIEN_BULLETS_COUNT];
-const int ALIEN_FIRE_SPEED = 20;
+const int ALIEN_FIRE_SPEED = 30;
 
 //clouds
 const int CLOUDS_COUNT = 6;
@@ -49,22 +49,21 @@ void setup(){
 		player_bullets[i] = nullptr;
 	}
 
-	for (int i = 0; i < CLOUDS_COUNT; i++){
-		clouds_tab[i] = nullptr;
-	}
+	// for (int i = 0; i < CLOUDS_COUNT; i++){
+	// 	clouds_tab[i] = nullptr;
+	// }
 
 	for (int i = 0; i < ALIENS_COUNT; i++){
-		aliens_tab[i] == nullptr;
+		aliens_tab[i] = nullptr;
 	}
 
 	// for (int i = 0; i < ALIENS_COUNT; i++){
-	// 	aliens_alive[i] == 1;
+	// 	aliens_alive[i] = 1;
 	// }
 
 	for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
-		alien_bullets[i] == nullptr;
+		alien_bullets[i] = nullptr;
 	}
-
 }
 
 void loop(){
@@ -110,7 +109,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	//player alien collision
 	#if(!TEST)
 	for (int i = 0; i < ALIENS_COUNT; i++){
-		if (aliens_tab[i] -> alien_collision(ship_x, ship_y)){
+		if (aliens_tab[i] -> alien_collision(ship_x, ship_y, nullptr)){
 			lifes--;
 			ship_x = 0;
 			ship_y = 21;
@@ -126,15 +125,17 @@ while (gb.update()){ //returns true every 50ms; 20fps
 			lifes--;
 			ship_x = 0;
 			ship_y = 21;
-			gb.popup(F("reset"), 20);
+			//gb.popup(F("reset"), 20);
 			//gb.popup("Lifes: " + lifes, 20 * 2);
 
 			for (int i = 0; i < ALIENS_COUNT; i++){
-				aliens_tab[i] == nullptr;
+				delete aliens_tab[i];
+				aliens_tab[i] = nullptr;
 			}
 
 			for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
-				alien_bullets[i] == nullptr;
+				delete alien_bullets[i];
+				alien_bullets[i] = nullptr;
 			}
 		}
 	}
@@ -142,12 +143,14 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	
 	// __________ALIENS__________
 	//create alien
-	for (int i = 0; i < ALIENS_COUNT; i++){
-		if (aliens_tab[i] == nullptr){
-			aliens_tab[i] = new aliens(random(1, 4));
+	if(!(gb.frameCount % 20)){
+		for (int i = 0; i < ALIENS_COUNT; i++){
+			if (aliens_tab[i] == nullptr){
+				aliens_tab[i] = new aliens(random(1, 10));
+				break;
+			}
 		}
 	}
-	
 	//move alien
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		if (aliens_tab[i] != nullptr)
@@ -158,6 +161,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		}
 	}
 
+	//alien fire
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		for (int j = 0; j < ALIEN_BULLETS_COUNT; j++){
 			if(alien_bullets[j] == nullptr && aliens_tab[i] != nullptr && !(gb.frameCount % ALIEN_FIRE_SPEED)){
@@ -176,7 +180,6 @@ while (gb.update()){ //returns true every 50ms; 20fps
 			alien_bullets[i] = nullptr;
 		}
 	}
-
 																							 
 	//alien - bullet collision
 	for (int i = 0; i < ALIENS_COUNT; i++){
@@ -210,7 +213,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 	gb.display.drawBitmap(ship_x, ship_y, SHIP);
 
-
+	gb.display.println(gb.getFreeRam());
 
 	//draw player bullets
 	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
