@@ -121,6 +121,12 @@ private:
 
 public:
 	aliens(int type){
+		if(type < 7){
+			type = 1;
+		} else if (type < 9){
+			type = 2;
+		} else type = 3;
+
 		switch (type){
 			case 1:
 				alien = ALIEN_1;
@@ -129,7 +135,7 @@ public:
 
 				speed = 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 50);
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 2:
@@ -140,7 +146,7 @@ public:
 				random(0,1) ? speed = 1: speed = -1;
 				// speed1= 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 50);
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 3:
@@ -151,7 +157,7 @@ public:
 				random(0,1) ? speed = 1: speed = -1;
 				speed = 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 50);
+				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
 				pos_y = random(0, LCDHEIGHT - 7);
 
 				line = random(0, LCDHEIGHT - 9);
@@ -213,6 +219,7 @@ public:
 	bool alien_collision(int bullet_x, int bullet_y, bullet ** bul){
 		if (gb.collideBitmapBitmap(bullet_x, bullet_y, BULLET, pos_x, pos_y, alien)){
 			life--;
+			delete *bul;
 			*bul = nullptr;
 		}
 		return life <= 0 ? true : false;
