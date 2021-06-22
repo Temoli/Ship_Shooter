@@ -2,6 +2,7 @@
 #include <Gamebuino.h>
 Gamebuino gb;
 #define TEST 0 //1 - disable player death
+#define CLOUDS 0 //0 - disable clouds
 //84x48
 const int PLAYER = 1;
 const int ALIEN = 2;
@@ -17,7 +18,9 @@ int ship_y = 21;
 
 int ship_v = 1;
 
-int lifes = 3;
+int ship_lives = 4;
+int score = 0;
+int record = 0;
 //player bullets
 const int PLAYER_BULLETS_COUNT = 10;
 bullet *player_bullets[PLAYER_BULLETS_COUNT];
@@ -34,9 +37,11 @@ const int ALIEN_BULLETS_COUNT = 30;
 bullet *alien_bullets[ALIEN_BULLETS_COUNT];
 const int ALIEN_FIRE_SPEED = 30;
 
+#if(CLOUDS)
 //clouds
-const int CLOUDS_COUNT = 6;
+const int CLOUDS_COUNT = 5;
 clouds *clouds_tab[CLOUDS_COUNT];
+#endif
 
 //######_main_######
 
@@ -44,14 +49,17 @@ void setup(){
 	gb.begin();
 	gb.titleScreen(F("Ship shooter"));
 	gb.pickRandomSeed();
+	gb.display.setFont(font3x5);
 
 	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
 		player_bullets[i] = nullptr;
 	}
 
-	// for (int i = 0; i < CLOUDS_COUNT; i++){
-	// 	clouds_tab[i] = nullptr;
-	// }
+	#if(CLOUDS)
+	for (int i = 0; i < CLOUDS_COUNT; i++){
+		clouds_tab[i] = nullptr;
+	}
+	#endif
 
 	for (int i = 0; i < ALIENS_COUNT; i++){
 		aliens_tab[i] = nullptr;
@@ -69,174 +77,239 @@ void setup(){
 void loop(){
 while (gb.update()){ //returns true every 50ms; 20fps
 //INPUT
-	if (gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
-		ship_y -= ship_v;
-	} else if (gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
-		ship_y += ship_v;
-	} else if (gb.buttons.repeat(BTN_LEFT, 0) && ship_x > 0){
-		ship_x -= ship_v;
-	} else if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W){
-		ship_x += ship_v;
-	}
-
-	//create player bullets
-	if(bullet_delay_count < BULLET_DELAY_DURATION) bullet_delay_count++;
-	if (gb.buttons.repeat(BTN_A, 0) && bullet_delay_count == BULLET_DELAY_DURATION){
-		for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
-			if (player_bullets[i] == nullptr){
-				player_bullets[i] = new bullet(ship_x, ship_y, PLAYER);
-				bullet_delay_count = 0;
-				break;
-			}
-		}	
-	}
-
 	//go to menu
-	if(gb.buttons.repeat(BTN_C, 0) || lifes <= 0)
+	if(gb.buttons.repeat(BTN_C, 0))
 		gb.titleScreen(F("Space shooter"));
 
-//LOGIC
-	//__________PLAYER__________
-	//move bullets and/or delete bullets
-	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
-		if (player_bullets[i] != nullptr)
-			player_bullets[i] -> move_bullet();
-		if (player_bullets[i] -> bullet_out()){
-			delete player_bullets[i];
-			player_bullets[i] = nullptr;
+	if(ship_lives){
+		if (gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
+			ship_y -= ship_v;
+		} else if (gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
+			ship_y += ship_v;
+		} else if (gb.buttons.repeat(BTN_LEFT, 0) && ship_x > 0){
+			ship_x -= ship_v;
+		} else if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W){
+			ship_x += ship_v;
 		}
-	}
-	//player alien collision
-	#if(!TEST)
-	for (int i = 0; i < ALIENS_COUNT; i++){
-		if (aliens_tab[i] -> alien_collision(ship_x, ship_y, nullptr)){
-			lifes--;
-			ship_x = 0;
-			ship_y = 21;
-			//#TO_DO add pop up message with ramaining lifes; maybe copy int lifes to some string
-			//gb.popup("Lifes: " + lifes, 20 * 2);
-		}
-	}
-	#endif
-	//player - alien bullet collision
-	#if(!TEST)
-	for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
-		if (gb.collideBitmapBitmap(ship_x, ship_y, SHIP, alien_bullets[i] -> get_x(), alien_bullets[i] -> get_y(), BULLET)){
-			lifes--;
-			ship_x = 0;
-			ship_y = 21;
-			//gb.popup(F("reset"), 20);
-			//gb.popup("Lifes: " + lifes, 20 * 2);
 
+		//create player bullets
+		if(bullet_delay_count < BULLET_DELAY_DURATION) bullet_delay_count++;
+		if (gb.buttons.repeat(BTN_A, 0) && bullet_delay_count == BULLET_DELAY_DURATION){
+			for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
+				if (player_bullets[i] == nullptr){
+					player_bullets[i] = new bullet(ship_x, ship_y, PLAYER);
+					bullet_delay_count = 0;
+					break;
+				}
+			}	
+		}
+
+//LOGIC
+		//__________PLAYER__________
+		//move bullets and/or delete bullets
+		for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
+			if (player_bullets[i] != nullptr)
+				player_bullets[i] -> move_bullet();
+			if (player_bullets[i] -> bullet_out()){
+				delete player_bullets[i];
+				player_bullets[i] = nullptr;
+			}
+		}
+		//player alien collision
+		#if(!TEST)
+		for (int i = 0; i < ALIENS_COUNT; i++){
+			if (aliens_tab[i] -> alien_collision(ship_x, ship_y)){
+				ship_lives--;
+				ship_x = 0;
+				ship_y = 21;
+				break;
+				//#TO_DO add pop up message with ramaining lives; maybe copy int lives to some string
+				//gb.popup("Lives: " + lives, 20 * 2);
+			}
+		}
+		#endif
+		//player - alien bullet collision
+		#if(!TEST)
+		for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+			if (gb.collideBitmapBitmap(ship_x, ship_y, SHIP, alien_bullets[i] -> get_x(), alien_bullets[i] -> get_y(), BULLET)){
+				ship_lives--;
+				ship_x = 0;
+				ship_y = 21;
+				//gb.popup(F("reset"), 20);
+				//gb.popup("Lives: " + lives, 20 * 2);
+
+				for (int i = 0; i < ALIENS_COUNT; i++){
+					delete aliens_tab[i];
+					aliens_tab[i] = nullptr;
+				}
+
+				for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+					delete alien_bullets[i];
+					alien_bullets[i] = nullptr;
+				}
+				break;
+			}
+		}
+		#endif
+		
+		// __________ALIENS__________
+		//create alien
+		if(!(gb.frameCount % 20)){
 			for (int i = 0; i < ALIENS_COUNT; i++){
+				if (aliens_tab[i] == nullptr){
+					aliens_tab[i] = new aliens(random(1, 11));
+					// aliens_tab[i] = new aliens(1);
+					break;
+				}
+			}
+		}
+		//move alien
+		for (int i = 0; i < ALIENS_COUNT; i++){
+			if (aliens_tab[i] != nullptr)
+				aliens_tab[i] -> move_alien();
+			if (aliens_tab[i] -> alien_out()){
 				delete aliens_tab[i];
 				aliens_tab[i] = nullptr;
 			}
+		}
 
-			for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+		//alien fire
+		for (int i = 0; i < ALIENS_COUNT; i++){
+			for (int j = 0; j < ALIEN_BULLETS_COUNT; j++){
+				if(alien_bullets[j] == nullptr && aliens_tab[i] != nullptr && !(gb.frameCount % ALIEN_FIRE_SPEED)){
+					alien_bullets[j] = aliens_tab[i] -> alien_fire();
+					break;
+				}
+			}
+		}
+
+		//move alien bullets and/or delete bullets 
+		for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+			if (alien_bullets[i] != nullptr)
+				alien_bullets[i] -> move_bullet();
+			if (alien_bullets[i] -> bullet_out()){
 				delete alien_bullets[i];
 				alien_bullets[i] = nullptr;
 			}
 		}
-	}
-	#endif
-	
-	// __________ALIENS__________
-	//create alien
-	if(!(gb.frameCount % 20)){
+																								
+		//alien - bullet collision
 		for (int i = 0; i < ALIENS_COUNT; i++){
-			if (aliens_tab[i] == nullptr){
-				aliens_tab[i] = new aliens(random(1, 10));
-				break;
+			for (int j = 0; j < PLAYER_BULLETS_COUNT; j++){
+				if ((aliens_tab[i] != nullptr && aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y(), &player_bullets[j], score))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
+					delete aliens_tab[i];
+					aliens_tab[i] = nullptr;
+				}
 			}
 		}
-	}
-	//move alien
-	for (int i = 0; i < ALIENS_COUNT; i++){
-		if (aliens_tab[i] != nullptr)
-			aliens_tab[i] -> move_alien();
-		if (aliens_tab[i] -> alien_out()){
-			delete aliens_tab[i];
-			aliens_tab[i] = nullptr;
-		}
-	}
 
-	//alien fire
-	for (int i = 0; i < ALIENS_COUNT; i++){
-		for (int j = 0; j < ALIEN_BULLETS_COUNT; j++){
-			if(alien_bullets[j] == nullptr && aliens_tab[i] != nullptr && !(gb.frameCount % ALIEN_FIRE_SPEED)){
-				alien_bullets[j] = aliens_tab[i] -> alien_fire();
-				break;
+		#if(CLOUDS)
+		//__________CLOUDS__________
+		//create clouds
+		if(!(gb.frameCount % 10)){
+			for (int i = 0; i < CLOUDS_COUNT; i++){
+				if (clouds_tab[i] == nullptr){
+					clouds_tab[i] = new clouds(random(1,4));
+					break;
+				}
 			}
 		}
-	}
-
-	//move alien bullets and/or delete bullets 
-	for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
-		if (alien_bullets[i] != nullptr)
-			alien_bullets[i] -> move_bullet();
-		if (alien_bullets[i] -> bullet_out()){
-			delete alien_bullets[i];
-			alien_bullets[i] = nullptr;
-		}
-	}
-																							 
-	//alien - bullet collision
-	for (int i = 0; i < ALIENS_COUNT; i++){
-		for (int j = 0; j < PLAYER_BULLETS_COUNT; j++){
-			if ((aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y(), &player_bullets[j]))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
-				delete aliens_tab[i];
-				aliens_tab[i] = nullptr;
+		//move and/or delete clouds
+		for (int i = 0; i < CLOUDS_COUNT; i++){
+			if (clouds_tab[i] != nullptr)
+				clouds_tab[i] -> move_cloud();
+			if (clouds_tab[i] -> cloud_out()){
+				delete clouds_tab[i];
+				clouds_tab[i] = nullptr;
 			}
 		}
-	}
+		#endif
 
-	//__________CLOUDS__________
-	// //create clouds
-	// for (int i = 0; i < CLOUDS_COUNT; i++){
-	// 	if (clouds_tab[i] == nullptr){
-	// 		clouds_tab[i] = new clouds(random(1,4));
-	// 	}
-	// }
-	// //move and/or delete clouds
-	// for (int i = 0; i < CLOUDS_COUNT; i++){
-	// 	if (clouds_tab[i] != nullptr)
-	// 		clouds_tab[i] -> move_cloud();
-	// 	if (clouds_tab[i] -> cloud_out()){
-	// 		delete clouds_tab[i];
-	// 		clouds_tab[i] = nullptr;
-	// 	}
-	// }
+		if (record < score) record = score;
+
+		if(ship_lives == 0){ // delay(1500); //player died, time for player understand what happend and release buttons
+			gb.display.println(F("You lost"));
+			delay(1500);
+		}
+
+	} //if(ship_lives)
+
+	//reset game
+
+	if(ship_lives == 0){
+		gb.display.clear();
+		gb.display.cursorX = 5;
+		gb.display.cursorY = 5;
+		gb.display.println(F("You lost"));
+		gb.display.println(F("Do you want to"));
+		gb.display.println(F("play again?"));
+		gb.display.println(F("UP - yes"));
+		gb.display.println(F("DOWN - no"));
+		delay(1500);
+		if(gb.buttons.repeat(BTN_UP, 0)){
+			ship_lives = 4;
+			score = 0;
+		}
+		if(gb.buttons.repeat(BTN_DOWN, 0)){
+			ship_lives = 4;
+			score = 0;
+			gb.titleScreen(F("Ship shooter"));
+		}
+	}
 
 //DRAW
-	gb.display.clear();
+	if(ship_lives){
+		gb.display.clear();
 
-	gb.display.drawBitmap(ship_x, ship_y, SHIP);
+		#if(TEST)
+		gb.display.println(gb.getFreeRam());
+		#endif
 
-	gb.display.println(gb.getFreeRam());
+		//display lives and score
+		if (gb.frameCount % 2){
+			//display ship lives
+			gb.display.cursorX = 0;
+			gb.display.cursorY = 0;
+			gb.display.print("Lives: ");
+			gb.display.print(ship_lives);
 
-	//draw player bullets
-	for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
-		if (player_bullets[i] != nullptr)
-			player_bullets[i] -> draw_bullet();
-	}
+			//display score
+			gb.display.cursorX = 0;
+			gb.display.cursorY = 37;
+			gb.display.print("Score: ");
+			gb.display.println(score);
+			gb.display.print("Record: ");
+			gb.display.println(record);
+		}
 
-	//draw alien
-	for (int i = 0; i < ALIENS_COUNT; i++){
-		if (aliens_tab[i] != nullptr)
-			aliens_tab[i] -> display_alien();
-	}
+		gb.display.drawBitmap(ship_x, ship_y, SHIP);
 
-	//draw alien bullets
-	for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
-		if (alien_bullets[i] != nullptr)
-			alien_bullets[i] -> draw_bullet();
-	}
 
-	//draw clouds
-	for (int i = 0; i < CLOUDS_COUNT; i++){
-		if (clouds_tab[i] != nullptr)
-			clouds_tab[i] -> draw_cloud();
+		//draw player bullets
+		for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
+			if (player_bullets[i] != nullptr)
+				player_bullets[i] -> draw_bullet();
+		}
+
+		//draw alien
+		for (int i = 0; i < ALIENS_COUNT; i++){
+			if (aliens_tab[i] != nullptr)
+				aliens_tab[i] -> display_alien();
+		}
+
+		//draw alien bullets
+		for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+			if (alien_bullets[i] != nullptr)
+				alien_bullets[i] -> draw_bullet();
+		}
+
+		#if(CLOUDS)
+		//draw clouds
+		for (int i = 0; i < CLOUDS_COUNT; i++){
+			if (clouds_tab[i] != nullptr)
+				clouds_tab[i] -> draw_cloud();
+		}
+		#endif
 	}
 
 
