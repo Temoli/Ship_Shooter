@@ -1,4 +1,5 @@
 extern Gamebuino gb;
+extern const byte font3x5[];
 
 extern const int PLAYER;
 extern const int ALIEN;
@@ -108,12 +109,13 @@ private:
 	int pos_x;
 	int pos_y;
 	int speed;
+	int point_value;
 
 	byte * alien;
 
 	int bullet_speed;
 
-	int life;
+	int live;
 
 	//used in type 3
 	bool bounce;
@@ -121,46 +123,51 @@ private:
 
 public:
 	aliens(int type){
-		if(type < 7){
+		if(type < 7)
 			type = 1;
-		} else if (type < 9){
+		else if (type < 9)
 			type = 2;
-		} else type = 3;
+		else type = 3;
 
 		switch (type){
 			case 1:
 				alien = ALIEN_1;
 				this->type = type;
-				life = 2;
+				live = 2;
+				point_value = 1;
 
 				speed = 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
+				// pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
+				pos_x = LCDWIDTH + 2;
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 2:
 				alien = ALIEN_2;
 				this->type = type;
-				life = 3;
+				live = 3;
+				point_value = 2;
 				
 				random(0,1) ? speed = 1: speed = -1;
 				// speed1= 1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
+				// pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
+				pos_x = LCDWIDTH + 2;
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
 			case 3:
 				alien = ALIEN_3;
 				this->type = type;
-				life = 4;
+				live = 4;
+				point_value = 3;
 				
-				random(0,1) ? speed = 1: speed = -1;
-				speed = 1;
+				random(0,2) ? speed = 1: speed = -1;
 
-				pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
+				// pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
+				pos_x = LCDWIDTH + 2;
 				pos_y = random(0, LCDHEIGHT - 7);
 
-				line = random(0, LCDHEIGHT - 9);
+				line = random(0, 21);
 				bounce = false;
 				break;
 		}
@@ -186,10 +193,10 @@ public:
 				if(!bounce){ //if not bounced fly up/down till reached screen edge
 					pos_y += speed;
 					if (pos_y <= 0){
-						speed = -speed;
+						speed = speed * -2;
 						bounce = true;
 					} else if (pos_y >= LCDHEIGHT - 8){
-						speed = -speed;
+						speed = speed * -2;
 						bounce = true;
 					}
 				}
@@ -216,12 +223,20 @@ public:
 		return new bullet(pos_x, pos_y, ALIEN);
 	}
 
-	bool alien_collision(int bullet_x, int bullet_y, bullet ** bul){
+	bool alien_collision(int bullet_x, int bullet_y, bullet ** ptr_bullet_obj, int &score){
 		if (gb.collideBitmapBitmap(bullet_x, bullet_y, BULLET, pos_x, pos_y, alien)){
-			life--;
-			delete *bul;
-			*bul = nullptr;
+			live--;
+			delete *ptr_bullet_obj;
+			*ptr_bullet_obj = nullptr;
 		}
-		return life <= 0 ? true : false;
+		// return live <= 0 ? true : false;
+		if (live <= 0){
+			score += point_value;
+			return true;
+		} else return false;
+	}
+
+	bool alien_collision(int bullet_x, int bullet_y){
+		return gb.collideBitmapBitmap(bullet_x, bullet_y, BULLET, pos_x, pos_y, alien);
 	}
 };
