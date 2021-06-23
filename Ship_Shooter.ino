@@ -21,6 +21,7 @@ int ship_v = 1;
 int ship_lives = 4;
 int score = 0;
 int record = 0;
+int frames = 20 * 5; //time to wait after death 20 * seconds to wait;
 //player bullets
 const int PLAYER_BULLETS_COUNT = 10;
 bullet *player_bullets[PLAYER_BULLETS_COUNT];
@@ -118,25 +119,41 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		//player alien collision
 		#if(!TEST)
 		for (int i = 0; i < ALIENS_COUNT; i++){
-			if (aliens_tab[i] -> alien_collision(ship_x, ship_y)){
+			if (aliens_tab[i] != nullptr && aliens_tab[i] -> alien_collision(ship_x, ship_y)){
 				ship_lives--;
 				ship_x = 0;
 				ship_y = 21;
+
+				for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
+					delete player_bullets[i];
+					player_bullets[i] = nullptr;
+				}
+
+				for (int i = 0; i < ALIENS_COUNT; i++){
+					delete aliens_tab[i];
+					aliens_tab[i] = nullptr;
+				}
+
+				for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
+					delete alien_bullets[i];
+					alien_bullets[i] = nullptr;
+				}
 				break;
-				//#TO_DO add pop up message with ramaining lives; maybe copy int lives to some string
-				//gb.popup("Lives: " + lives, 20 * 2);
 			}
 		}
 		#endif
 		//player - alien bullet collision
 		#if(!TEST)
 		for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
-			if (gb.collideBitmapBitmap(ship_x, ship_y, SHIP, alien_bullets[i] -> get_x(), alien_bullets[i] -> get_y(), BULLET)){
+			if (alien_bullets[i] != nullptr && gb.collideBitmapBitmap(ship_x, ship_y, SHIP, alien_bullets[i] -> get_x(), alien_bullets[i] -> get_y(), BULLET)){
 				ship_lives--;
 				ship_x = 0;
 				ship_y = 21;
-				//gb.popup(F("reset"), 20);
-				//gb.popup("Lives: " + lives, 20 * 2);
+
+				for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
+					delete player_bullets[i];
+					player_bullets[i] = nullptr;
+				}
 
 				for (int i = 0; i < ALIENS_COUNT; i++){
 					delete aliens_tab[i];
@@ -229,7 +246,8 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 		if(ship_lives == 0){ // delay(1500); //player died, time for player understand what happend and release buttons
 			gb.display.println(F("You lost"));
-			delay(1500);
+			// delay(1500);
+			// wait(100);
 		}
 
 	} //if(ship_lives)
@@ -237,22 +255,39 @@ while (gb.update()){ //returns true every 50ms; 20fps
 	//reset game
 
 	if(ship_lives == 0){
-		gb.display.clear();
+	
+		// int frames = gb.frameCount;
+		while(frames-- > 0){
+			while(!gb.update());
+			// gb.display.println(F("You lost"));
+			// gb.display.clear();
+			gb.display.clear();
+			gb.display.cursorX = 27;
+			gb.display.cursorY = 18;
+			gb.display.println(F("You lost"));
+			gb.display.cursorX = 40;
+			gb.display.println(frames / 20);
+		}
+
 		gb.display.cursorX = 5;
-		gb.display.cursorY = 5;
-		gb.display.println(F("You lost"));
+		gb.display.cursorY = 12;
 		gb.display.println(F("Do you want to"));
+		gb.display.cursorX = 5;
 		gb.display.println(F("play again?"));
-		gb.display.println(F("UP - yes"));
-		gb.display.println(F("DOWN - no"));
-		delay(1500);
+		gb.display.cursorX = 5;
+		gb.display.println(F("  UP - yes"));
+		gb.display.cursorX = 5;
+		gb.display.println(F("  DOWN - no"));
+		// delay(1500);
 		if(gb.buttons.repeat(BTN_UP, 0)){
 			ship_lives = 4;
 			score = 0;
+			frames = 20 * 5;
 		}
 		if(gb.buttons.repeat(BTN_DOWN, 0)){
 			ship_lives = 4;
 			score = 0;
+			frames = 20 * 5;
 			gb.titleScreen(F("Ship shooter"));
 		}
 	}
@@ -315,3 +350,23 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 }//gb.update END
 }//loop() END
+
+void wait(int frames_to_wait){
+	int frames = gb.frameCount;
+	while(frames++ < frames_to_wait){
+		while(!gb.update());
+		gb.display.println(F("You lost"));
+	}
+	gb.display.clear();
+}
+
+// void wait(int frames_to_wait){
+// 	int frames = gb.frameCount;
+// 	// gb.frameCount = 0; // reset the framecount
+// 	while(frames++ < frames_to_wait){ // repeat the next until the framecount is equal to how many frames we want to wait
+// 		while(!gb.update()); // wait until things need updating
+// 	// right here you would put things to update the screen, if it got erased, that is (configurable via gb.display.persistence )
+// 		gb.display.println(F("You lost"));
+// 	}
+// 	gb.display.clear();
+// }
