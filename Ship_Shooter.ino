@@ -21,7 +21,8 @@ int ship_v = 1;
 int ship_lives = 4;
 int score = 0;
 int record = 0;
-int frames = 20 * 5; //time to wait after death 20 * seconds to wait;
+int time_after_death = 20 * 4; //time to wait after death 20 * seconds to wait;
+
 //player bullets
 const int PLAYER_BULLETS_COUNT = 10;
 bullet *player_bullets[PLAYER_BULLETS_COUNT];
@@ -78,7 +79,19 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 	if(ship_lives){
 		//move ship
-		if (gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
+		if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W && gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
+			ship_x += ship_v;
+			ship_y += ship_v;
+		} else if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W && gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
+			ship_x += ship_v;
+			ship_y -= ship_v;
+		} else if (gb.buttons.repeat(BTN_LEFT, 0) && ship_x > 0 && gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
+			ship_x -= ship_v;
+			ship_y += ship_v;
+		} else if (gb.buttons.repeat(BTN_LEFT, 0) && ship_x > 0 && gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
+			ship_x -= ship_v;
+			ship_y -= ship_v;
+		} else if (gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
 			ship_y -= ship_v;
 		} else if (gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
 			ship_y += ship_v;
@@ -86,7 +99,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 			ship_x -= ship_v;
 		} else if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W){
 			ship_x += ship_v;
-		}
+		}			
 
 		//fire; create player bullets
 		if(bullet_delay_count < BULLET_DELAY_DURATION) bullet_delay_count++;
@@ -245,14 +258,14 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 	//reset game
 	if(ship_lives == 0){
-		while(frames-- > 0){
+		while(time_after_death-- > 8){
 			while(!gb.update());
 			gb.display.clear();
 			gb.display.cursorX = 27;
 			gb.display.cursorY = 18;
 			gb.display.println(F("You lost"));
 			gb.display.cursorX = 40;
-			gb.display.println(frames / 20);
+			gb.display.println(time_after_death / 20);
 		}
 		gb.display.cursorX = 5;
 		gb.display.cursorY = 12;
@@ -266,15 +279,15 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		if(gb.buttons.repeat(BTN_UP, 0)){
 			ship_lives = 4;
 			score = 0;
-			frames = 20 * 5;
+			time_after_death = 20 * 4;
 		}
 		if(gb.buttons.repeat(BTN_DOWN, 0)){
 			ship_lives = 4;
 			score = 0;
-			frames = 20 * 5;
+			time_after_death = 20 * 4;
 			gb.titleScreen(F("Ship shooter"));
 		}
-	}
+	} //reset game END
 
 //DRAW
 	if(ship_lives){
@@ -328,8 +341,6 @@ while (gb.update()){ //returns true every 50ms; 20fps
 				clouds_tab[i] -> draw_cloud();
 		}
 		#endif
-	}
-
-
+	} //if(ship_lives) END in DRAW
 }//gb.update END
 }//loop() EN
