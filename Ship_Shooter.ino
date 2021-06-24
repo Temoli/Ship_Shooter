@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <Gamebuino.h>
 Gamebuino gb;
-#define TEST 0 //1 - disable player death
+#define TEST 0 //1 - disable player death and shows free memory
 #define CLOUDS 0 //0 - disable clouds
 //84x48
 const int PLAYER = 1;
@@ -21,7 +21,8 @@ int ship_v = 1;
 int ship_lives = 4;
 int score = 0;
 int record = 0;
-int frames = 20 * 5; //time to wait after death 20 * seconds to wait;
+int time_after_death = 20 * 4; //time to wait after death 20 * seconds to wait;
+
 //player bullets
 const int PLAYER_BULLETS_COUNT = 10;
 bullet *player_bullets[PLAYER_BULLETS_COUNT];
@@ -31,7 +32,6 @@ int bullet_delay_count = BULLET_DELAY_DURATION; //it will be better if player wi
 //aliens
 const int ALIENS_COUNT = 10;
 aliens *aliens_tab[ALIENS_COUNT];
-//int aliens_alive[ALIENS_COUNT]; //if 1 alien is dead if its <=0 alien is alive at this position x; it prevents aliens from overlapping
 
 //aliens bullets
 const int ALIEN_BULLETS_COUNT = 30;
@@ -44,8 +44,7 @@ const int CLOUDS_COUNT = 5;
 clouds *clouds_tab[CLOUDS_COUNT];
 #endif
 
-//######_main_######
-
+//__________MAIN__________
 void setup(){
 	gb.begin();
 	gb.titleScreen(F("Ship shooter"));
@@ -66,10 +65,6 @@ void setup(){
 		aliens_tab[i] = nullptr;
 	}
 
-	// for (int i = 0; i < ALIENS_COUNT; i++){
-	// 	aliens_alive[i] = 1;
-	// }
-
 	for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
 		alien_bullets[i] = nullptr;
 	}
@@ -83,7 +78,20 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		gb.titleScreen(F("Space shooter"));
 
 	if(ship_lives){
-		if (gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
+		//move ship
+		if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W && gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
+			ship_x += ship_v;
+			ship_y += ship_v;
+		} else if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W && gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
+			ship_x += ship_v;
+			ship_y -= ship_v;
+		} else if (gb.buttons.repeat(BTN_LEFT, 0) && ship_x > 0 && gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
+			ship_x -= ship_v;
+			ship_y += ship_v;
+		} else if (gb.buttons.repeat(BTN_LEFT, 0) && ship_x > 0 && gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
+			ship_x -= ship_v;
+			ship_y -= ship_v;
+		} else if (gb.buttons.repeat(BTN_UP, 0) && ship_y > 0){
 			ship_y -= ship_v;
 		} else if (gb.buttons.repeat(BTN_DOWN, 0) && ship_y < LCDHEIGHT - SHIP_H){
 			ship_y += ship_v;
@@ -91,9 +99,9 @@ while (gb.update()){ //returns true every 50ms; 20fps
 			ship_x -= ship_v;
 		} else if (gb.buttons.repeat(BTN_RIGHT, 0) && ship_x < LCDWIDTH - SHIP_W){
 			ship_x += ship_v;
-		}
+		}			
 
-		//create player bullets
+		//fire; create player bullets
 		if(bullet_delay_count < BULLET_DELAY_DURATION) bullet_delay_count++;
 		if (gb.buttons.repeat(BTN_A, 0) && bullet_delay_count == BULLET_DELAY_DURATION){
 			for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
@@ -111,11 +119,12 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
 			if (player_bullets[i] != nullptr)
 				player_bullets[i] -> move_bullet();
-			if (player_bullets[i] -> bullet_out()){
+			if (player_bullets[i] != nullptr && player_bullets[i] -> bullet_out()){
 				delete player_bullets[i];
 				player_bullets[i] = nullptr;
 			}
 		}
+		
 		//player alien collision
 		#if(!TEST)
 		for (int i = 0; i < ALIENS_COUNT; i++){
@@ -142,6 +151,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 			}
 		}
 		#endif
+		
 		//player - alien bullet collision
 		#if(!TEST)
 		for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
@@ -175,16 +185,16 @@ while (gb.update()){ //returns true every 50ms; 20fps
 			for (int i = 0; i < ALIENS_COUNT; i++){
 				if (aliens_tab[i] == nullptr){
 					aliens_tab[i] = new aliens(random(1, 11));
-					// aliens_tab[i] = new aliens(1);
 					break;
 				}
 			}
 		}
+		
 		//move alien
 		for (int i = 0; i < ALIENS_COUNT; i++){
 			if (aliens_tab[i] != nullptr)
 				aliens_tab[i] -> move_alien();
-			if (aliens_tab[i] -> alien_out()){
+			if (aliens_tab[i] != nullptr && aliens_tab[i] -> alien_out()){
 				delete aliens_tab[i];
 				aliens_tab[i] = nullptr;
 			}
@@ -204,7 +214,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		for (int i = 0; i < ALIEN_BULLETS_COUNT; i++){
 			if (alien_bullets[i] != nullptr)
 				alien_bullets[i] -> move_bullet();
-			if (alien_bullets[i] -> bullet_out()){
+			if (alien_bullets[i] != nullptr && alien_bullets[i] -> bullet_out()){
 				delete alien_bullets[i];
 				alien_bullets[i] = nullptr;
 			}
@@ -213,7 +223,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		//alien - bullet collision
 		for (int i = 0; i < ALIENS_COUNT; i++){
 			for (int j = 0; j < PLAYER_BULLETS_COUNT; j++){
-				if ((aliens_tab[i] != nullptr && aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y(), &player_bullets[j], score))){ //probably x+2 to read bullets right end; hit alien and if alien is dead delete it
+				if ((aliens_tab[i] != nullptr && aliens_tab[i] -> alien_collision(player_bullets[j] -> get_x(), player_bullets[j] -> get_y(), &player_bullets[j], score))){ //check if &player_bullets[j] can be replaced with player_bullets[j]
 					delete aliens_tab[i];
 					aliens_tab[i] = nullptr;
 				}
@@ -231,11 +241,12 @@ while (gb.update()){ //returns true every 50ms; 20fps
 				}
 			}
 		}
+		
 		//move and/or delete clouds
 		for (int i = 0; i < CLOUDS_COUNT; i++){
 			if (clouds_tab[i] != nullptr)
 				clouds_tab[i] -> move_cloud();
-			if (clouds_tab[i] -> cloud_out()){
+			if (clouds_tab[i] != nullptr && clouds_tab[i] -> cloud_out()){
 				delete clouds_tab[i];
 				clouds_tab[i] = nullptr;
 			}
@@ -243,32 +254,19 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		#endif
 
 		if (record < score) record = score;
-
-		if(ship_lives == 0){ // delay(1500); //player died, time for player understand what happend and release buttons
-			gb.display.println(F("You lost"));
-			// delay(1500);
-			// wait(100);
-		}
-
-	} //if(ship_lives)
+	} //if(ship_lives) END
 
 	//reset game
-
 	if(ship_lives == 0){
-	
-		// int frames = gb.frameCount;
-		while(frames-- > 0){
+		while(time_after_death-- > 8){
 			while(!gb.update());
-			// gb.display.println(F("You lost"));
-			// gb.display.clear();
 			gb.display.clear();
 			gb.display.cursorX = 27;
 			gb.display.cursorY = 18;
 			gb.display.println(F("You lost"));
 			gb.display.cursorX = 40;
-			gb.display.println(frames / 20);
+			gb.display.println(time_after_death / 20);
 		}
-
 		gb.display.cursorX = 5;
 		gb.display.cursorY = 12;
 		gb.display.println(F("Do you want to"));
@@ -278,19 +276,18 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		gb.display.println(F("  UP - yes"));
 		gb.display.cursorX = 5;
 		gb.display.println(F("  DOWN - no"));
-		// delay(1500);
 		if(gb.buttons.repeat(BTN_UP, 0)){
 			ship_lives = 4;
 			score = 0;
-			frames = 20 * 5;
+			time_after_death = 20 * 4;
 		}
 		if(gb.buttons.repeat(BTN_DOWN, 0)){
 			ship_lives = 4;
 			score = 0;
-			frames = 20 * 5;
+			time_after_death = 20 * 4;
 			gb.titleScreen(F("Ship shooter"));
 		}
-	}
+	} //reset game END
 
 //DRAW
 	if(ship_lives){
@@ -319,7 +316,6 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 		gb.display.drawBitmap(ship_x, ship_y, SHIP);
 
-
 		//draw player bullets
 		for (int i = 0; i < PLAYER_BULLETS_COUNT; i++){
 			if (player_bullets[i] != nullptr)
@@ -345,28 +341,6 @@ while (gb.update()){ //returns true every 50ms; 20fps
 				clouds_tab[i] -> draw_cloud();
 		}
 		#endif
-	}
-
-
+	} //if(ship_lives) END in DRAW
 }//gb.update END
-}//loop() END
-
-void wait(int frames_to_wait){
-	int frames = gb.frameCount;
-	while(frames++ < frames_to_wait){
-		while(!gb.update());
-		gb.display.println(F("You lost"));
-	}
-	gb.display.clear();
-}
-
-// void wait(int frames_to_wait){
-// 	int frames = gb.frameCount;
-// 	// gb.frameCount = 0; // reset the framecount
-// 	while(frames++ < frames_to_wait){ // repeat the next until the framecount is equal to how many frames we want to wait
-// 		while(!gb.update()); // wait until things need updating
-// 	// right here you would put things to update the screen, if it got erased, that is (configurable via gb.display.persistence )
-// 		gb.display.println(F("You lost"));
-// 	}
-// 	gb.display.clear();
-// }
+}//loop() EN
