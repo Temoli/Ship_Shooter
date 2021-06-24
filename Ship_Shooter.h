@@ -97,7 +97,7 @@ public:
 	}
 
 	bool bullet_out(){
-		if ((pos_x > LCDWIDTH + 2 && whose_bullet == PLAYER) || (pos_x < -15 && whose_bullet == ALIEN))//TEST_1; it was (pos_x < -2 && whose_bullet == ALIEN)
+		if ((pos_x > LCDWIDTH + 2 && whose_bullet == PLAYER) || (pos_x < -4 && whose_bullet == ALIEN))
 			return true;
 		else return false;
 	}
@@ -138,7 +138,6 @@ public:
 
 				speed = 1;
 
-				// pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
 				pos_x = LCDWIDTH + 2;
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
@@ -149,9 +148,7 @@ public:
 				point_value = 2;
 				
 				random(0,1) ? speed = 1: speed = -1;
-				// speed1= 1;
 
-				// pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
 				pos_x = LCDWIDTH + 2;
 				pos_y = random(0, LCDHEIGHT - 7);
 				break;
@@ -163,7 +160,6 @@ public:
 				
 				random(0,2) ? speed = 1: speed = -1;
 
-				// pos_x = random(LCDWIDTH + 5, LCDWIDTH + 15);
 				pos_x = LCDWIDTH + 2;
 				pos_y = random(0, LCDHEIGHT - 7);
 
@@ -214,7 +210,7 @@ public:
 	}
 	
 	bool alien_out(){
-		if(pos_x < -10) //TEST_1; it was -20
+		if(pos_x < -10)
 			return true;
 		else return false;
 	}
@@ -229,7 +225,6 @@ public:
 			delete *ptr_bullet_obj;
 			*ptr_bullet_obj = nullptr;
 		}
-		// return live <= 0 ? true : false;
 		if (live <= 0){
 			score += point_value;
 			return true;
