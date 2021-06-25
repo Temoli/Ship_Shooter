@@ -45,9 +45,7 @@ public:
 	}
 
 	bool cloud_out(){
-		if(pos_x < -40)
-			return true;
-		else return false;
+		return pos_x < -40 ? true: false;
 	}
 
 	void draw_cloud(){
@@ -115,7 +113,7 @@ private:
 
 	int bullet_speed;
 
-	int live;
+	int life;
 
 	//used in type 3
 	bool bounce;
@@ -133,7 +131,7 @@ public:
 			case 1:
 				alien = ALIEN_1;
 				this->type = type;
-				live = 2;
+				life = 2;
 				point_value = 1;
 
 				speed = 1;
@@ -144,7 +142,7 @@ public:
 			case 2:
 				alien = ALIEN_2;
 				this->type = type;
-				live = 3;
+				life = 3;
 				point_value = 2;
 				
 				random(0,1) ? speed = 1: speed = -1;
@@ -155,7 +153,7 @@ public:
 			case 3:
 				alien = ALIEN_3;
 				this->type = type;
-				live = 4;
+				life = 4;
 				point_value = 3;
 				
 				random(0,2) ? speed = 1: speed = -1;
@@ -171,10 +169,10 @@ public:
 
 	void move_alien(){
 		switch (type){
-			case 1:
+			case 1: //flies only forward
 				pos_x -= speed;
 				break;
-			case 2:
+			case 2: //flies diagonally and bounces from top and bottom edges
 				pos_x -= abs(speed);
 				pos_y += speed;
 				if (pos_y <= 0){
@@ -183,7 +181,7 @@ public:
 					speed = -speed;
 				}
 				break;
-			case 3:
+			case 3: //flies diagonally, bounces once from top or bottom edge, speeds up a bit, flies diagonally random numbers of lines and then flies forward
 				pos_x -= abs(speed);
 
 				if(!bounce){ //if not bounced fly up/down till reached screen edge
@@ -197,9 +195,8 @@ public:
 					}
 				}
 
-				if(bounce && line > 0){ //if bounced fly up/dwn a few more lines
+				if(bounce && line-- > 0){ //if bounced fly up/dwn a few more lines
 					pos_y += speed;
-					line--;
 				}
 				break;
 		}
@@ -210,9 +207,7 @@ public:
 	}
 	
 	bool alien_out(){
-		if(pos_x < -10)
-			return true;
-		else return false;
+		return pos_x < -10 ? true : false;
 	}
 
 	bullet *alien_fire(){
@@ -221,11 +216,11 @@ public:
 
 	bool alien_collision(int bullet_x, int bullet_y, bullet ** ptr_bullet_obj, int &score){
 		if (gb.collideBitmapBitmap(bullet_x, bullet_y, BULLET, pos_x, pos_y, alien)){
-			live--;
+			life--;
 			delete *ptr_bullet_obj;
 			*ptr_bullet_obj = nullptr;
 		}
-		if (live <= 0){
+		if (life <= 0){
 			score += point_value;
 			return true;
 		} else return false;
