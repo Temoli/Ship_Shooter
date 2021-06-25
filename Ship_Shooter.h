@@ -148,7 +148,7 @@ public:
 				random(0,1) ? speed = 1: speed = -1;
 
 				pos_x = LCDWIDTH + 2;
-				pos_y = random(0, LCDHEIGHT - 7);
+				pos_y = random(1, LCDHEIGHT - 7); //if it was random(0, LCDHEIGHT - 7) some aliens were blocked at the top of the screen and flickering
 				break;
 			case 3:
 				alien = ALIEN_3;
@@ -161,7 +161,7 @@ public:
 				pos_x = LCDWIDTH + 2;
 				pos_y = random(0, LCDHEIGHT - 7);
 
-				line = random(0, 21);
+				line = random(0, 31);
 				bounce = false;
 				break;
 		}
