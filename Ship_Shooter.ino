@@ -258,7 +258,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 
 	//reset game
 	if(ship_lives == 0){
-		while(time_after_death-- > 8){
+		while(time_after_death-- > 8){ //after death pause game for some time
 			while(!gb.update());
 			gb.display.clear();
 			gb.display.cursorX = 27;
