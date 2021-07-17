@@ -18,7 +18,7 @@ int ship_y = 21;
 
 int ship_v = 1;
 
-int ship_lives = 4;
+int ship_lives = 3;
 int score = 0;
 int record = 0;
 int time_after_death = 20 * 4; //time to wait after death 20 * seconds to wait;
@@ -181,7 +181,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		
 		// __________ALIENS__________
 		//create alien
-		if(!(gb.frameCount % 20)){
+		if(!(gb.frameCount % 10)){ //This prevents aliens from forming over other aliens and sending one huge wave of them
 			for (int i = 0; i < ALIENS_COUNT; i++){
 				if (aliens_tab[i] == nullptr){
 					aliens_tab[i] = new aliens(random(1, 11));
@@ -277,12 +277,12 @@ while (gb.update()){ //returns true every 50ms; 20fps
 		gb.display.cursorX = 5;
 		gb.display.println(F("  DOWN - no"));
 		if(gb.buttons.repeat(BTN_UP, 0)){
-			ship_lives = 4;
+			ship_lives = 3;
 			score = 0;
 			time_after_death = 20 * 4;
 		}
 		if(gb.buttons.repeat(BTN_DOWN, 0)){
-			ship_lives = 4;
+			ship_lives = 3;
 			score = 0;
 			time_after_death = 20 * 4;
 			gb.titleScreen(F("Ship shooter"));
@@ -303,7 +303,7 @@ while (gb.update()){ //returns true every 50ms; 20fps
 			gb.display.cursorX = 0;
 			gb.display.cursorY = 0;
 			gb.display.print("Lives: ");
-			gb.display.print(ship_lives);
+			gb.display.print(ship_lives-1);
 
 			//display score
 			gb.display.cursorX = 0;
